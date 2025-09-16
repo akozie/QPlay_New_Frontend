@@ -17,7 +17,7 @@ import Layout from '../layout';
 
 const Quiz = ({ onBack }) => {
 
-    const url = ["https://cube.brainiacc.com"];
+    const url = ["https://supercareengine-production.up.railway.app"];
     const accessToken  = '3333';
 
 
