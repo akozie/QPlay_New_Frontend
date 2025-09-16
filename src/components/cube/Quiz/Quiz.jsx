@@ -17,7 +17,7 @@ import Layout from '../layout';
 
 const Quiz = ({ onBack }) => {
 
-    const url = ["http://localhost:9997"];
+    const url = ["https://cube.brainiacc.com"];
     const accessToken  = '3333';
 
 
