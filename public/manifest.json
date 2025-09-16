@@ -1,0 +1,29 @@
+{
+  "short_name": "CubeCover",
+  "name": "CubeCover - World-Class AI Health & Wellness Platform",
+  "icons": [
+    {
+      "src": "cube.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "cube.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "cube.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#22c55e",
+  "background_color": "#f0fdf4",
+  "description": "CubeCover is your all-in-one AI-powered health and wellness platform. Track your health, connect with experts, and access world-class resources for a healthier, happier life. Join thousands improving their wellbeing with CubeCover.",
+  "lang": "en",
+  "orientation": "portrait",
+  "scope": "/"
+}
