@@ -29,7 +29,7 @@ const Quiz = ({ onBack }) => {
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(300); // Default 5 minutes
+  const [timeLeft, setTimeLeft] = useState(60); // Default 5 minutes
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [showResults, setShowResults] = useState(false);
@@ -90,7 +90,7 @@ const Quiz = ({ onBack }) => {
       const transformedData = {
         title: "CubeCover Knowledge Quiz",
         description: "Test your knowledge about CubeCover and insurance!",
-        timeLimit: 300, // 5 minutes
+        timeLimit: 60, // 5 minutes
         questions: data.map((item) => {
           // Convert answer letter to index (A=0, B=1, C=2, D=3)
           const answerMap = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
