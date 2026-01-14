@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import logo2 from "./Assets/sc-logo.png";
 import logo1 from "./Assets/cube.jpeg";
 
@@ -7,7 +6,6 @@ const Layout = ({ children }) => {
   return (
     <>
       <div className="min-h-screen relative">
-        {/* Header with Logo and CubeCover */}
         <header className="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
             <div className="flex items-center gap-3">
@@ -17,9 +15,7 @@ const Layout = ({ children }) => {
           </div>
         </header>
 
-        {/* Main content with top padding to account for fixed header */}
         <main className="h-full pt-16">{children}</main>
-
         <div className="fixed bottom-0 right-0 p-3 flip-wrapper">
           <img src={logo2} alt="spinning logo" className="flip-x w-20 h-30" />
         </div>

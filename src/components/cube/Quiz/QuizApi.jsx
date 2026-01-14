@@ -15,15 +15,28 @@ import {
 import { quizData } from './QuizData';
 import Layout from '../layout';
 
-const Quiz = ({ onBack }) => {
+const QuizApi = ({ onBack }) => {
+
+  const url = ["https://cube.brainiacc.com"];
+  const accessToken  = '3333';
+
+
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${accessToken || ""}`,
+  };
+
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
+  const [timeLeft, setTimeLeft] = useState(60); // Default 5 minutes
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
-  const [currentQuizQuestions, setCurrentQuizQuestions] = useState([]);
+  const [apiQuizData, setApiQuizData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Timer effect
   useEffect(() => {
@@ -48,7 +61,65 @@ const Quiz = ({ onBack }) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Fetch quiz data from API
+  const fetchQuizData = async () => {
+    if (!url || !headers) {
+      setError('Authentication not ready');
+      return;
+    }
 
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${url}/quiz`, {
+        method: 'GET',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch quiz data: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      const transformedData = {
+        title: "CubeCover Knowledge Quiz",
+        description: "Test your knowledge about CubeCover and insurance!",
+        timeLimit: 60, // 1 minute
+        questions: data.map((item) => {
+          // Convert answer letter to index (A=0, B=1, C=2, D=3)
+          const answerMap = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 };
+          const correctAnswerIndex = answerMap[item.answers.toUpperCase()];
+          
+          return {
+            id: item.id,
+            question: item.question,
+            options: [
+              item.option_a,
+              item.option_b,
+              item.option_c,
+              item.option_d
+            ],
+            correctAnswer: correctAnswerIndex,
+            explanation: `The correct answer is "${item.correct_answer}"`
+          };
+        })
+      };
+
+      setApiQuizData(transformedData);
+      setTimeLeft(transformedData.timeLimit);
+      
+    } catch (error) {
+      console.error('Error fetching quiz data:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAnswerSelect = (questionId, answerIndex) => {
     setSelectedAnswers(prev => ({
@@ -57,22 +128,7 @@ const Quiz = ({ onBack }) => {
     }));
   };
 
-  const getQuizData = () => {
-    return {
-      ...quizData,
-      questions: currentQuizQuestions.length > 0 ? currentQuizQuestions : quizData.questions
-    };
-  };
-
-  const initializeQuiz = () => {
-    const shuffledQuestions = [...quizData.questions]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 10);
-    
-    setCurrentQuizQuestions(shuffledQuestions);
-    setQuizStarted(true);
-    setTimeLeft(quizData.timeLimit);
-  };
+  const getQuizData = () => apiQuizData || quizData;
 
   const handleNextQuestion = () => {
     const currentQuizData = getQuizData();
@@ -147,7 +203,11 @@ const Quiz = ({ onBack }) => {
             <h1 className="text-3xl font-bold text-gray-800 mb-4">{getQuizData().title}</h1>
             <p className="text-gray-600 text-lg mb-8">{getQuizData().description}</p>
             
-
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
+                <strong>Error:</strong> {error}
+              </div>
+            )}
             
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <div className="bg-blue-50 rounded-xl p-4">
@@ -173,11 +233,20 @@ const Quiz = ({ onBack }) => {
 
             <div className="flex justify-center gap-4">
               <button
-                onClick={initializeQuiz}
-                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all font-semibold flex items-center gap-2"
+                onClick={async () => {
+                  if (!apiQuizData && !error) {
+                    await fetchQuizData();
+                  }
+                  if (!error) {
+                    setQuizStarted(true);
+                    setTimeLeft(getQuizData().timeLimit);
+                  }
+                }}
+                disabled={loading}
+                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all font-semibold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Brain className="w-5 h-5" />
-                Start Quiz
+                {loading ? 'Loading Quiz...' : 'Start Quiz'}
               </button>
               {onBack && (
                 <button
@@ -437,4 +506,4 @@ const Quiz = ({ onBack }) => {
   );
 };
 
-export default Quiz;
+export default QuizApi;
