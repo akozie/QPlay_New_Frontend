@@ -9,8 +9,8 @@ const Layout = ({ children }) => {
         <header className="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
             <div className="flex items-center gap-3">
-              <img src={logo1} alt="CubeCover Logo" className="w-10 h-10" />
-              <h1 className="text-2xl font-bold text-gray-800">CubeCover</h1>
+              <img src={logo1} alt="Qplay Logo" className="w-10 h-10" />
+              <h1 className="text-2xl font-bold text-gray-800">QPlay</h1>
             </div>
           </div>
         </header>

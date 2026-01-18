@@ -87,8 +87,8 @@ const QuizApi = ({ onBack }) => {
       const data = await response.json();
       
       const transformedData = {
-        title: "CubeCover Knowledge Quiz",
-        description: "Test your knowledge about CubeCover and insurance!",
+        title: "QPlay Knowledge Quiz",
+        description: "Test your knowledge about QPlay and insurance!",
         timeLimit: 60, // 1 minute
         questions: data.map((item) => {
           // Convert answer letter to index (A=0, B=1, C=2, D=3)
