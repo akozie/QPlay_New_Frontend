@@ -1,6 +1,6 @@
 export const quizData = {
   title: "Qplay Knowledge Quiz",
-  description: "Test your knowledge about QPlay and general topics!",
+  description: "Test your knowledge about QPlay and general topics!!",
   timeLimit: 60, //seconds
   questions: [
     {
