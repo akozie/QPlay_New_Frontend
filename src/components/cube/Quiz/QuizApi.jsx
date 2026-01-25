@@ -17,15 +17,20 @@ import Layout from '../layout';
 
 const QuizApi = ({ onBack }) => {
 
-  const url = ["https://cube.brainiacc.com"];
-  const accessToken  = '3333';
-
+  // Base URL of the Go backend API
+  const baseUrl = "https://qplay-backend-api.onrender.com";
 
   const headers = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${accessToken || ""}`,
   };
 
+  // Auth state
+  const [msisdn, setMsisdn] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [authStatus, setAuthStatus] = useState(null); // 'success' | 'error' | null
+  const [authMessage, setAuthMessage] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -61,18 +66,48 @@ const QuizApi = ({ onBack }) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Auth against backend /auth
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthMessage("");
+    setAuthStatus(null);
+
+    try {
+      const response = await fetch(`${baseUrl}/auth`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          msisdn,
+          first_name: firstName,
+          last_name: lastName,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.status) {
+        setAuthStatus('success');
+        setAuthMessage(data.message || 'Authorized');
+      } else {
+        setAuthStatus('error');
+        setAuthMessage(data.message || 'Not authorized');
+      }
+    } catch (err) {
+      console.error('Error during auth:', err);
+      setAuthStatus('error');
+      setAuthMessage('Network error during auth');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
   // Fetch quiz data from API
   const fetchQuizData = async () => {
-    if (!url || !headers) {
-      setError('Authentication not ready');
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${url}/quiz`, {
+      const response = await fetch(`${baseUrl}/quiz`, {
         method: 'GET',
         headers: {
           ...headers,
@@ -145,7 +180,29 @@ const QuizApi = ({ onBack }) => {
     }
   };
 
-  const handleQuizComplete = () => {
+  const recordGameplay = async (finalScore, totalQuestions) => {
+    if (!msisdn || authStatus !== 'success') {
+      return; // only record for authorized users
+    }
+
+    try {
+      await fetch(`${baseUrl}/gameplay`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          msisdn,
+          first_name: firstName,
+          last_name: lastName,
+          score: finalScore,
+          total_questions: totalQuestions,
+        }),
+      });
+    } catch (err) {
+      console.error('Error recording gameplay:', err);
+    }
+  };
+
+  const handleQuizComplete = async () => {
     const currentQuizData = getQuizData();
     const correctAnswers = currentQuizData.questions.reduce((acc, question) => {
       if (selectedAnswers[question.id] === question.correctAnswer) {
@@ -153,10 +210,13 @@ const QuizApi = ({ onBack }) => {
       }
       return acc;
     }, 0);
-    
+
     setScore(correctAnswers);
     setQuizCompleted(true);
     setShowResults(true);
+
+    // Fire-and-forget gameplay recording
+    recordGameplay(correctAnswers, currentQuizData.questions.length);
   };
 
   const handleRestart = () => {
@@ -203,6 +263,63 @@ const QuizApi = ({ onBack }) => {
             <h1 className="text-3xl font-bold text-gray-800 mb-4">{getQuizData().title}</h1>
             <p className="text-gray-600 text-lg mb-8">{getQuizData().description}</p>
             
+            {/* Auth form */}
+            <div className="max-w-xl mx-auto mb-8 text-left">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Enter your details to play</h2>
+              <form onSubmit={handleAuth} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">MSISDN (Phone Number)</label>
+                  <input
+                    type="text"
+                    value={msisdn}
+                    onChange={(e) => setMsisdn(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="2348XXXXXXXXX"
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                    <input
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                    <input
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {authMessage && (
+                  <div
+                    className={`px-4 py-3 rounded-xl text-sm ${
+                      authStatus === 'success'
+                        ? 'bg-green-100 text-green-800 border border-green-300'
+                        : 'bg-red-100 text-red-800 border border-red-300'
+                    }`}
+                  >
+                    {authMessage}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={authLoading}
+                  className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {authLoading ? 'Checking subscription...' : 'Verify Subscription'}
+                </button>
+              </form>
+            </div>
+
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
                 <strong>Error:</strong> {error}
@@ -234,6 +351,11 @@ const QuizApi = ({ onBack }) => {
             <div className="flex justify-center gap-4">
               <button
                 onClick={async () => {
+                  if (authStatus !== 'success') {
+                    setAuthMessage('Please verify your subscription before starting the quiz.');
+                    setAuthStatus('error');
+                    return;
+                  }
                   if (!apiQuizData && !error) {
                     await fetchQuizData();
                   }
