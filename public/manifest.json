@@ -1,6 +1,6 @@
 {
-  "short_name": "CubeCover",
-  "name": "CubeCover - World-Class AI Health & Wellness Platform",
+  "short_name": "QPlay",
+  "name": "QPlay",
   "icons": [
     {
       "src": "cube.ico",
@@ -22,7 +22,7 @@
   "display": "standalone",
   "theme_color": "#22c55e",
   "background_color": "#f0fdf4",
-  "description": "CubeCover is your all-in-one AI-powered health and wellness platform. Track your health, connect with experts, and access world-class resources for a healthier, happier life. Join thousands improving their wellbeing with CubeCover.",
+  "description": "QPlay",
   "lang": "en",
   "orientation": "portrait",
   "scope": "/"
