@@ -1,5 +1,5 @@
-import logo2 from "./Assets/sc-logo.png";
-import logo1 from "./Assets/cube.jpeg";
+import logo2 from "./Assets/qplaytext.png";
+import logo1 from "./Assets/qplay.jpeg";
 
 
 const Layout = ({ children }) => {
@@ -17,7 +17,7 @@ const Layout = ({ children }) => {
 
         <main className="h-full pt-16">{children}</main>
         <div className="fixed bottom-0 right-0 p-3 flip-wrapper">
-          {/* <img src={logo2} alt="spinning logo" className="flip-x w-20 h-30" /> */}
+          <img src={logo2} alt="spinning logo" className="flip-x w-20 h-30" />
         </div>
       </div>
 
